@@ -3,501 +3,692 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>LaundryHub - Aplikasi Manajemen Laundry Modern</title>
+    <title>LaundryHub — Modern Clean Garment Care</title>
+    
+    <!-- Google Fonts: Instrument Serif for editorial display, Plus Jakarta Sans for UI, JetBrains Mono for metrics -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
         :root {
-            --bg-color: #0f172a;
-            --surface-color: rgba(30, 41, 59, 0.7);
-            --surface-border: rgba(255, 255, 255, 0.1);
-            --primary: #38bdf8;
-            --primary-hover: #0284c7;
-            --accent: #818cf8;
-            --success: #34d399;
-            --warning: #fbbf24;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
+            /* Hallmark Day / Light Editorial Tokens */
+            --color-paper: #fbfbfa;
+            --color-surface: #ffffff;
+            --color-surface-hover: #f8fafc;
+            --color-ink: #18181b;
+            --color-ink-muted: #71717a;
+            --color-ink-subtle: #a1a1aa;
+            
+            --color-border: #e4e4e7;
+            --color-border-subtle: #f4f4f5;
+            
+            --color-primary: #18181b;
+            --color-primary-hover: #27272a;
+            --color-accent: #2563eb;
+            --color-accent-soft: #eff6ff;
+            --color-accent-border: #bfdbfe;
+            
+            --color-warning-bg: #fefce8;
+            --color-warning-ink: #854d0e;
+            --color-warning-border: #fef08a;
+
+            --color-success-bg: #f0fdf4;
+            --color-success-ink: #166534;
+            --color-success-border: #bbf7d0;
+
+            --font-display: "Instrument Serif", Georgia, serif;
+            --font-sans: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+            --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+            --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 10px 24px -6px rgba(0, 0, 0, 0.04);
+            --shadow-float: 0 20px 35px -10px rgba(0, 0, 0, 0.08);
+
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 18px;
+            --radius-full: 9999px;
         }
 
         * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
-            font-family: 'Outfit', sans-serif;
         }
 
+        html, body {
+            overflow-x: clip;
+            background-color: var(--color-paper);
+            color: var(--color-ink);
+            font-family: var(--font-sans);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            line-height: 1.5;
+        }
+
+        /* Subtle warm paper noise/gradient */
         body {
-            background-color: var(--bg-color);
-            background-image: 
-                radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.15) 0px, transparent 50%),
-                radial-gradient(at 100% 100%, rgba(129, 140, 248, 0.15) 0px, transparent 50%),
-                radial-gradient(at 50% 50%, rgba(15, 23, 42, 1) 0px, transparent 100%);
-            color: var(--text-main);
             min-height: 100vh;
-            padding: 2rem 1rem;
+            background-image: 
+                radial-gradient(at 15% 15%, rgba(244, 244, 245, 0.8) 0px, transparent 60%),
+                radial-gradient(at 85% 85%, rgba(239, 246, 255, 0.6) 0px, transparent 50%);
+            padding: 2.5rem 1.5rem;
         }
 
-        .container {
-            max-width: 1200px;
+        .layout {
+            max-width: 1160px;
             margin: 0 auto;
         }
 
-        header {
+        /* Top Navigation / Brand Bar */
+        .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 2.5rem;
-            padding-bottom: 1.5rem;
-            border-bottom: 1px solid var(--surface-border);
+            padding-bottom: 2rem;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--color-border);
         }
 
-        .logo {
+        .brand-group {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-        }
-
-        .logo-icon {
-            width: 44px;
-            height: 44px;
-            background: linear-gradient(135deg, var(--primary), var(--accent));
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 20px rgba(56, 189, 248, 0.3);
-            font-size: 1.5rem;
-        }
-
-        .logo-text h1 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            background: linear-gradient(to right, #fff, #94a3b8);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .logo-text p {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-        }
-
-        .badges {
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-        }
-
-        .badge {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--surface-border);
-            padding: 0.35rem 0.75rem;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: 500;
-            color: var(--primary);
-            display: flex;
-            align-items: center;
-            gap: 0.35rem;
-        }
-
-        .badge-dot {
-            width: 6px;
-            height: 6px;
-            background-color: var(--success);
-            border-radius: 50%;
-            box-shadow: 0 0 8px var(--success);
-        }
-
-        .main-grid {
-            display: grid;
-            grid-template-columns: 1fr 1.3fr;
-            gap: 2rem;
-        }
-
-        @media (max-width: 900px) {
-            .main-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .card {
-            background: var(--surface-color);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid var(--surface-border);
-            border-radius: 20px;
-            padding: 2rem;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
-        }
-
-        .card-header {
-            margin-bottom: 1.5rem;
-        }
-
-        .card-header h2 {
-            font-size: 1.3rem;
-            font-weight: 600;
-            color: #fff;
-            margin-bottom: 0.25rem;
-        }
-
-        .card-header p {
-            font-size: 0.875rem;
-            color: var(--text-muted);
-        }
-
-        .form-group {
-            margin-bottom: 1.25rem;
-        }
-
-        .form-label {
-            display: block;
-            font-size: 0.875rem;
-            font-weight: 500;
-            margin-bottom: 0.5rem;
-            color: #e2e8f0;
-        }
-
-        .form-control {
-            width: 100%;
-            background: rgba(15, 23, 42, 0.6);
-            border: 1px solid var(--surface-border);
-            border-radius: 12px;
-            padding: 0.85rem 1rem;
-            color: #fff;
-            font-size: 0.95rem;
-            outline: none;
-            transition: all 0.2s ease;
-        }
-
-        .form-control:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
-        }
-
-        .service-options {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
             gap: 1rem;
-            margin-bottom: 1.25rem;
         }
 
-        .service-card {
-            border: 2px solid var(--surface-border);
-            background: rgba(15, 23, 42, 0.5);
-            border-radius: 14px;
-            padding: 1rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            position: relative;
-        }
-
-        .service-card:hover {
-            border-color: rgba(56, 189, 248, 0.5);
-            transform: translateY(-2px);
-        }
-
-        .service-card.selected {
-            border-color: var(--primary);
-            background: rgba(56, 189, 248, 0.1);
-            box-shadow: 0 0 20px rgba(56, 189, 248, 0.15);
-        }
-
-        .service-card h4 {
-            font-size: 1rem;
-            font-weight: 600;
-            margin-bottom: 0.25rem;
-        }
-
-        .service-card p {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            margin-bottom: 0.5rem;
-        }
-
-        .service-card .price-tag {
-            font-size: 0.9rem;
-            font-weight: 700;
-            color: var(--primary);
-        }
-
-        .weight-input-container {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .weight-btn {
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid var(--surface-border);
-            color: #fff;
-            width: 44px;
-            height: 44px;
-            border-radius: 10px;
+        .brand-mark {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-md);
+            background: var(--color-primary);
+            color: #ffffff;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 1.25rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        }
+
+        .brand-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: var(--color-ink);
+        }
+
+        .brand-subtitle {
+            font-size: 0.8rem;
+            color: var(--color-ink-muted);
+            font-weight: 400;
+        }
+
+        .header-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .tag-pill {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 0.35rem 0.75rem;
+            border-radius: var(--radius-full);
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            color: var(--color-ink-muted);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .tag-indicator {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background-color: #10b981;
+            box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+        }
+
+        /* Hero Editorial Section */
+        .hero {
+            margin-bottom: 2.75rem;
+        }
+
+        .hero-eyebrow {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--color-accent);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .hero-title {
+            font-family: var(--font-display);
+            font-size: 3rem;
+            line-height: 1.15;
+            font-weight: 400;
+            color: var(--color-ink);
+            letter-spacing: -0.015em;
+            max-width: 800px;
+            margin-bottom: 0.75rem;
+        }
+
+        .hero-desc {
+            font-size: 1.05rem;
+            color: var(--color-ink-muted);
+            max-width: 640px;
+            font-weight: 400;
+        }
+
+        /* Two-Column Grid */
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 2rem;
+            align-items: start;
+        }
+
+        @media (max-width: 960px) {
+            .grid-container {
+                grid-template-columns: 1fr;
+            }
+            .hero-title {
+                font-size: 2.35rem;
+            }
+        }
+
+        /* Card Primitive */
+        .card {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            box-shadow: var(--shadow-card);
+        }
+
+        .card-header {
+            margin-bottom: 1.75rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--color-border-subtle);
+        }
+
+        .card-eyebrow {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--color-ink-subtle);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 0.25rem;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--color-ink);
+            letter-spacing: -0.015em;
+        }
+
+        /* Form Controls */
+        .field-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .field-label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--color-ink);
+            margin-bottom: 0.5rem;
+        }
+
+        .field-hint {
+            font-size: 0.75rem;
+            color: var(--color-ink-muted);
+            font-weight: 400;
+            margin-top: 0.25rem;
+        }
+
+        .input-text {
+            width: 100%;
+            height: 46px;
+            padding: 0 1rem;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            font-size: 0.95rem;
+            color: var(--color-ink);
+            background: var(--color-surface);
+            outline: none;
+            transition: all 0.15s ease;
+        }
+
+        .input-text:focus {
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(24, 24, 27, 0.08);
+        }
+
+        /* Service Cards Selection */
+        .service-picker {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.85rem;
+        }
+
+        .picker-card {
+            border: 1.5px solid var(--color-border);
+            background: var(--color-surface);
+            border-radius: var(--radius-md);
+            padding: 1.15rem;
+            cursor: pointer;
+            transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+        }
+
+        .picker-card:hover {
+            border-color: var(--color-ink-subtle);
+            background: var(--color-surface-hover);
+        }
+
+        .picker-card.is-active {
+            border-color: var(--color-primary);
+            background: #ffffff;
+            box-shadow: 0 0 0 1px var(--color-primary), 0 4px 14px rgba(0, 0, 0, 0.05);
+        }
+
+        .picker-badge {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--color-ink-muted);
+            margin-bottom: 0.35rem;
+        }
+
+        .picker-name {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--color-ink);
+            margin-bottom: 0.25rem;
+        }
+
+        .picker-rate {
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--color-accent);
+        }
+
+        /* Weight Numeric Stepper */
+        .stepper-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .stepper-btn {
+            width: 46px;
+            height: 46px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--color-border);
+            background: var(--color-surface);
+            color: var(--color-ink);
+            font-size: 1.25rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
             transition: all 0.15s ease;
         }
 
-        .weight-btn:hover {
-            background: rgba(255, 255, 255, 0.15);
+        .stepper-btn:hover {
+            background: var(--color-border-subtle);
+            border-color: var(--color-ink-subtle);
         }
 
-        .calc-preview {
-            background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9));
-            border: 1px dashed rgba(56, 189, 248, 0.3);
-            border-radius: 14px;
+        .stepper-input {
+            flex: 1;
+            height: 46px;
+            text-align: center;
+            font-family: var(--font-mono);
+            font-size: 1.15rem;
+            font-weight: 600;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            color: var(--color-ink);
+            outline: none;
+        }
+
+        .stepper-input:focus {
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(24, 24, 27, 0.08);
+        }
+
+        /* Clean Paper Receipt / Ticket Box */
+        .receipt-ticket {
+            background: #fafaf9;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
             padding: 1.25rem;
             margin-bottom: 1.5rem;
+            font-family: var(--font-mono);
+            position: relative;
         }
 
-        .calc-row {
+        .receipt-row {
             display: flex;
             justify-content: space-between;
+            font-size: 0.8rem;
+            color: var(--color-ink-muted);
+            margin-bottom: 0.4rem;
+        }
+
+        .receipt-divider {
+            border-top: 1px dashed var(--color-border);
+            margin: 0.75rem 0;
+        }
+
+        .receipt-total {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
             font-size: 0.85rem;
-            margin-bottom: 0.5rem;
-            color: var(--text-muted);
-        }
-
-        .calc-row.total {
-            font-size: 1.15rem;
-            font-weight: 700;
-            color: #fff;
-            margin-top: 0.75rem;
-            padding-top: 0.75rem;
-            border-top: 1px solid var(--surface-border);
-        }
-
-        .calc-row.total .price {
-            color: var(--success);
-        }
-
-        .btn-submit {
-            width: 100%;
-            background: linear-gradient(135deg, var(--primary), #0284c7);
-            color: #fff;
-            border: none;
-            border-radius: 12px;
-            padding: 1rem;
-            font-size: 1rem;
             font-weight: 600;
+            color: var(--color-ink);
+        }
+
+        .receipt-total .amount {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--color-primary);
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* Primary Action Button */
+        .btn-action {
+            width: 100%;
+            height: 50px;
+            background: var(--color-primary);
+            color: #ffffff;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 0.95rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
             cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 15px rgba(2, 132, 199, 0.3);
+            transition: all 0.15s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
         }
 
-        .btn-submit:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(2, 132, 199, 0.4);
+        .btn-action:hover {
+            background: var(--color-primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
         }
 
-        .btn-submit:disabled {
-            opacity: 0.6;
+        .btn-action:active {
+            transform: translateY(0);
+        }
+
+        .btn-action:disabled {
+            opacity: 0.5;
             cursor: not-allowed;
             transform: none;
         }
 
-        .table-container {
+        /* Orders Ledger Table */
+        .ledger-table-wrap {
             overflow-x: auto;
         }
 
-        table {
+        .ledger-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.875rem;
+            font-size: 0.85rem;
         }
 
-        th {
+        .ledger-table th {
             text-align: left;
-            padding: 0.75rem 1rem;
-            color: var(--text-muted);
-            border-bottom: 1px solid var(--surface-border);
-            font-weight: 500;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        td {
-            padding: 1rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        tr:hover td {
-            background: rgba(255, 255, 255, 0.02);
-        }
-
-        .status-pill {
-            display: inline-block;
-            padding: 0.25rem 0.65rem;
-            border-radius: 9999px;
-            font-size: 0.75rem;
+            padding: 0.75rem 0.85rem;
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
             font-weight: 600;
+            color: var(--color-ink-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            border-bottom: 1px solid var(--color-border);
         }
 
-        .status-pending {
-            background: rgba(251, 191, 36, 0.15);
-            color: var(--warning);
-            border: 1px solid rgba(251, 191, 36, 0.3);
+        .ledger-table td {
+            padding: 1rem 0.85rem;
+            border-bottom: 1px solid var(--color-border-subtle);
+            color: var(--color-ink);
         }
 
-        .status-in-progress {
-            background: rgba(56, 189, 248, 0.15);
-            color: var(--primary);
-            border: 1px solid rgba(56, 189, 248, 0.3);
+        .ledger-table tr:hover td {
+            background-color: var(--color-surface-hover);
         }
 
-        .status-completed {
-            background: rgba(52, 211, 153, 0.15);
-            color: var(--success);
-            border: 1px solid rgba(52, 211, 153, 0.3);
+        .invoice-code {
+            font-family: var(--font-mono);
+            font-weight: 600;
+            color: var(--color-primary);
         }
 
-        .toast {
+        .customer-cell {
+            font-weight: 500;
+        }
+
+        .rate-cell {
+            font-family: var(--font-mono);
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+            color: var(--color-ink);
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.65rem;
+            border-radius: var(--radius-full);
+            font-size: 0.725rem;
+            font-weight: 600;
+            font-family: var(--font-mono);
+            letter-spacing: 0.02em;
+        }
+
+        .badge-pending {
+            background: var(--color-warning-bg);
+            color: var(--color-warning-ink);
+            border: 1px solid var(--color-warning-border);
+        }
+
+        .badge-in_progress {
+            background: var(--color-accent-soft);
+            color: var(--color-accent);
+            border: 1px solid var(--color-accent-border);
+        }
+
+        .badge-completed {
+            background: var(--color-success-bg);
+            color: var(--color-success-ink);
+            border: 1px solid var(--color-success-border);
+        }
+
+        .empty-ledger {
+            text-align: center;
+            padding: 3.5rem 1rem;
+            color: var(--color-ink-muted);
+        }
+
+        .empty-ledger-code {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: var(--color-ink-subtle);
+            margin-top: 0.5rem;
+        }
+
+        /* Toast Feedback */
+        .toast-banner {
             position: fixed;
             bottom: 2rem;
             right: 2rem;
-            background: #1e293b;
-            border: 1px solid var(--surface-border);
-            border-radius: 12px;
-            padding: 1rem 1.5rem;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            box-shadow: var(--shadow-float);
+            border-radius: var(--radius-md);
+            padding: 1rem 1.25rem;
             display: none;
             align-items: center;
             gap: 0.75rem;
-            z-index: 1000;
-            animation: slideIn 0.3s ease;
+            font-size: 0.875rem;
+            font-weight: 500;
+            z-index: 9999;
+            animation: popUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        @keyframes slideIn {
-            from { transform: translateY(100%); opacity: 0; }
+        @keyframes popUp {
+            from { transform: translateY(16px); opacity: 0; }
             to { transform: translateY(0); opacity: 1; }
         }
 
-        .toast.success {
-            border-color: var(--success);
+        .toast-banner.is-success {
+            border-left: 4px solid #10b981;
         }
 
-        .toast.error {
-            border-color: #ef4444;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 3rem 1rem;
-            color: var(--text-muted);
-        }
-
-        .empty-state-icon {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-            opacity: 0.6;
+        .toast-banner.is-error {
+            border-left: 4px solid #ef4444;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <div class="logo">
-                <div class="logo-icon">🧺</div>
-                <div class="logo-text">
-                    <h1>LaundryHub</h1>
-                    <p>Clean • Fast • Reliable</p>
+    <div class="layout">
+        <!-- Brand Header -->
+        <header class="header">
+            <div class="brand-group">
+                <div class="brand-mark">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 6h18M7 12h10M10 18h4"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="brand-title">LaundryHub</div>
+                    <div class="brand-subtitle">Automated Garment Logistics</div>
                 </div>
             </div>
-            <div class="badges">
-                <div class="badge">
-                    <span class="badge-dot"></span>
-                    <span>API v1 Ready</span>
-                </div>
-                <div class="badge">
-                    <span>PHPStan Level 8</span>
-                </div>
-                <div class="badge">
-                    <span>Strict Types 100%</span>
-                </div>
+
+            <div class="header-meta">
+                <span class="tag-pill">
+                    <span class="tag-indicator"></span>
+                    API Live
+                </span>
+                <span class="tag-pill">PHPStan Level 8</span>
+                <span class="tag-pill">Strict Types</span>
             </div>
         </header>
 
-        <div class="main-grid">
-            <!-- Form Order Baru -->
-            <div class="card">
+        <!-- Editorial Hero -->
+        <section class="hero">
+            <div class="hero-eyebrow">Production Order Terminal</div>
+            <h2 class="hero-title">Layanan binatu modern dengan kalkulasi tarif instan dan terkalibrasi.</h2>
+            <p class="hero-desc">
+                Input kuantitas cucian pelanggan untuk menghitung tarif otomatis secara presisi. Mendukung mode Standar dan Express dengan verifikasi status langsung.
+            </p>
+        </section>
+
+        <!-- Functional Workspace -->
+        <main class="grid-container">
+            <!-- Order Form Section -->
+            <section class="card">
                 <div class="card-header">
-                    <h2>Buat Pesanan Baru</h2>
-                    <p>Input detail cucian pelanggan untuk kalkulasi instan.</p>
+                    <div class="card-eyebrow">Entry Voucher</div>
+                    <h3 class="card-title">Buat Pesanan Baru</h3>
                 </div>
 
                 <form id="orderForm">
-                    <div class="form-group">
-                        <label class="form-label" for="customerName">Nama Pelanggan</label>
-                        <input type="text" id="customerName" class="form-control" placeholder="Contoh: Budi Santoso" required>
+                    <div class="field-group">
+                        <label class="field-label" for="customerName">Nama Lengkap Pelanggan</label>
+                        <input type="text" id="customerName" class="input-text" placeholder="Masukkan nama pelanggan..." required autocomplete="off">
+                        <div class="field-hint">Pelanggan baru akan otomatis didaftarkan ke sistem.</div>
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-label">Tipe Layanan</label>
-                        <div class="service-options">
-                            <div class="service-card selected" data-type="standar" onclick="selectService('standar')">
-                                <h4>Standar</h4>
-                                <p>Reguler 24 Jam</p>
-                                <div class="price-tag">Rp 10.000 / kg</div>
+                    <div class="field-group">
+                        <label class="field-label">Pilih Paket Layanan</label>
+                        <div class="service-picker">
+                            <div class="picker-card is-active" data-service="standar" onclick="setService('standar')">
+                                <div class="picker-badge">Reguler • 24 Jam</div>
+                                <div class="picker-name">Standar</div>
+                                <div class="picker-rate">Rp 10.000<span style="font-size: 0.75rem; font-weight: normal; color: var(--color-ink-muted);"> / kg</span></div>
                             </div>
-                            <div class="service-card" data-type="express" onclick="selectService('express')">
-                                <h4>Express</h4>
-                                <p>Prioritas 6 Jam</p>
-                                <div class="price-tag">Rp 20.000 / kg</div>
+                            <div class="picker-card" data-service="express" onclick="setService('express')">
+                                <div class="picker-badge">Prioritas • 6 Jam</div>
+                                <div class="picker-name">Express</div>
+                                <div class="picker-rate">Rp 20.000<span style="font-size: 0.75rem; font-weight: normal; color: var(--color-ink-muted);"> / kg</span></div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-label" for="weightKg">Berat Cucian (Minimal 2 kg)</label>
-                        <div class="weight-input-container">
-                            <button type="button" class="weight-btn" onclick="adjustWeight(-0.5)">-</button>
-                            <input type="number" id="weightKg" class="form-control" style="text-align: center; font-weight: 700; font-size: 1.1rem;" value="3.0" step="0.5" min="2" required oninput="updateCalculation()">
-                            <button type="button" class="weight-btn" onclick="adjustWeight(0.5)">+</button>
+                    <div class="field-group">
+                        <label class="field-label" for="weightKg">Berat Timbangan Cucian</label>
+                        <div class="stepper-container">
+                            <button type="button" class="stepper-btn" onclick="stepWeight(-0.5)">−</button>
+                            <input type="number" id="weightKg" class="stepper-input" value="3.0" step="0.5" min="2" required oninput="refreshReceipt()">
+                            <button type="button" class="stepper-btn" onclick="stepWeight(0.5)">+</button>
+                        </div>
+                        <div class="field-hint">Ambang batas penerimaan minimal adalah 2,0 kg.</div>
+                    </div>
+
+                    <!-- Receipt Preview Ticket -->
+                    <div class="receipt-ticket">
+                        <div class="receipt-row">
+                            <span>TARIF SATUAN</span>
+                            <span id="rateLabel">Rp 10.000</span>
+                        </div>
+                        <div class="receipt-row">
+                            <span>BOBOT TERUKUR</span>
+                            <span id="weightLabel">3.0 kg</span>
+                        </div>
+                        <div class="receipt-divider"></div>
+                        <div class="receipt-total">
+                            <span>TOTAL BIAYA</span>
+                            <span class="amount" id="totalLabel">Rp 30.000</span>
                         </div>
                     </div>
 
-                    <div class="calc-preview">
-                        <div class="calc-row">
-                            <span>Tarif per Kg</span>
-                            <span id="previewRate">Rp 10.000</span>
-                        </div>
-                        <div class="calc-row">
-                            <span>Total Berat</span>
-                            <span id="previewWeight">3.0 kg</span>
-                        </div>
-                        <div class="calc-row total">
-                            <span>Estimasi Total</span>
-                            <span class="price" id="previewTotal">Rp 30.000</span>
-                        </div>
-                    </div>
-
-                    <button type="submit" id="btnSubmit" class="btn-submit">Proses Pesanan (POST /api/orders)</button>
+                    <button type="submit" id="submitBtn" class="btn-action">
+                        <span>Terbitkan Pesanan</span>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                    </button>
                 </form>
-            </div>
+            </section>
 
-            <!-- Riwayat Pesanan -->
-            <div class="card">
-                <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <!-- Recent Orders Ledger -->
+            <section class="card">
+                <div class="card-header" style="display: flex; justify-content: space-between; align-items: baseline;">
                     <div>
-                        <h2>Riwayat Pesanan Terbaru</h2>
-                        <p>Daftar pesanan yang telah tersimpan di database.</p>
+                        <div class="card-eyebrow">Database Ledger</div>
+                        <h3 class="card-title">Transaksi Terkini</h3>
                     </div>
+                    <span class="tag-pill" style="font-size: 0.65rem;">SQLite Connected</span>
                 </div>
 
-                <div class="table-container">
-                    <table>
+                <div class="ledger-table-wrap">
+                    <table class="ledger-table">
                         <thead>
                             <tr>
-                                <th>No. Order</th>
+                                <th>Invoice</th>
                                 <th>Pelanggan</th>
                                 <th>Layanan</th>
                                 <th>Berat</th>
@@ -505,28 +696,30 @@
                                 <th>Status</th>
                             </tr>
                         </thead>
-                        <tbody id="orderTableBody">
+                        <tbody id="ledgerBody">
                             @forelse ($orders as $order)
                                 <tr>
-                                    <td><strong>{{ $order->order_number }}</strong></td>
-                                    <td>{{ $order->customer?->name ?? 'Anonim' }}</td>
+                                    <td class="invoice-code">{{ $order->order_number }}</td>
+                                    <td class="customer-cell">{{ $order->customer?->name ?? 'Anonim' }}</td>
                                     <td>
-                                        <span style="text-transform: capitalize;">{{ $order->service_type }}</span>
+                                        <span style="text-transform: capitalize; font-size: 0.8rem; color: var(--color-ink-muted);">
+                                            {{ $order->service_type }}
+                                        </span>
                                     </td>
-                                    <td>{{ number_format((float) $order->weight_kg, 1) }} kg</td>
-                                    <td style="font-weight: 600; color: var(--success);">Rp {{ number_format($order->total_amount, 0, ',', '.') }}</td>
+                                    <td class="rate-cell">{{ number_format((float) $order->weight_kg, 1) }} kg</td>
+                                    <td class="rate-cell">Rp {{ number_format($order->total_amount, 0, ',', '.') }}</td>
                                     <td>
-                                        <span class="status-pill status-{{ strtolower($order->status->value) }}">
+                                        <span class="status-badge badge-{{ strtolower($order->status->value) }}">
                                             {{ $order->status->label() }}
                                         </span>
                                     </td>
                                 </tr>
                             @empty
-                                <tr id="emptyRow">
+                                <tr id="emptyPlaceholder">
                                     <td colspan="6">
-                                        <div class="empty-state">
-                                            <div class="empty-state-icon">📄</div>
-                                            <p>Belum ada transaksi tersimpan.</p>
+                                        <div class="empty-ledger">
+                                            <p>Belum ada transaksi tersimpan dalam buku besar.</p>
+                                            <div class="empty-ledger-code">LND_REGISTRY_NULL</div>
                                         </div>
                                     </td>
                                 </tr>
@@ -534,141 +727,148 @@
                         </tbody>
                     </table>
                 </div>
-            </div>
-        </div>
+            </section>
+        </main>
     </div>
 
-    <!-- Toast Notification -->
-    <div id="toast" class="toast">
-        <span id="toastIcon" style="font-size: 1.25rem;">✅</span>
-        <span id="toastMessage">Pesanan berhasil dibuat!</span>
+    <!-- Notification Toast -->
+    <div id="toastNotification" class="toast-banner">
+        <span id="toastSymbol" style="font-size: 1.1rem;">•</span>
+        <span id="toastText">Notifikasi</span>
     </div>
 
     <script>
-        let selectedService = 'standar';
+        let currentService = 'standar';
 
-        function selectService(type) {
-            selectedService = type;
-            document.querySelectorAll('.service-card').forEach(card => {
-                if (card.dataset.type === type) {
-                    card.classList.add('selected');
+        function setService(service) {
+            currentService = service;
+            document.querySelectorAll('.picker-card').forEach(el => {
+                if (el.dataset.service === service) {
+                    el.classList.add('is-active');
                 } else {
-                    card.classList.remove('selected');
+                    el.classList.remove('is-active');
                 }
             });
-            updateCalculation();
+            refreshReceipt();
         }
 
-        function adjustWeight(amount) {
-            const input = document.getElementById('weightKg');
-            let current = parseFloat(input.value) || 2.0;
-            let next = Math.max(2.0, Math.round((current + amount) * 10) / 10);
-            input.value = next.toFixed(1);
-            updateCalculation();
+        function stepWeight(delta) {
+            const el = document.getElementById('weightKg');
+            let val = parseFloat(el.value) || 2.0;
+            let target = Math.max(2.0, Math.round((val + delta) * 10) / 10);
+            el.value = target.toFixed(1);
+            refreshReceipt();
         }
 
-        function formatRupiah(number) {
-            return 'Rp ' + number.toLocaleString('id-ID');
+        function toRupiah(num) {
+            return 'Rp ' + Number(num).toLocaleString('id-ID');
         }
 
-        function updateCalculation() {
+        function refreshReceipt() {
             const weight = parseFloat(document.getElementById('weightKg').value) || 0;
-            const rate = selectedService === 'express' ? 20000 : 10000;
-            const total = Math.round(weight * rate);
+            const rate = currentService === 'express' ? 20000 : 10000;
+            const grandTotal = Math.round(weight * rate);
 
-            document.getElementById('previewRate').textContent = formatRupiah(rate);
-            document.getElementById('previewWeight').textContent = weight.toFixed(1) + ' kg';
-            document.getElementById('previewTotal').textContent = formatRupiah(total);
+            document.getElementById('rateLabel').textContent = toRupiah(rate);
+            document.getElementById('weightLabel').textContent = weight.toFixed(1) + ' kg';
+            document.getElementById('totalLabel').textContent = toRupiah(grandTotal);
         }
 
-        function showToast(message, isError = false) {
-            const toast = document.getElementById('toast');
-            const toastIcon = document.getElementById('toastIcon');
-            const toastMessage = document.getElementById('toastMessage');
+        function triggerToast(text, isError = false) {
+            const toast = document.getElementById('toastNotification');
+            const symbol = document.getElementById('toastSymbol');
+            const label = document.getElementById('toastText');
 
-            toastMessage.textContent = message;
-            toast.className = 'toast ' + (isError ? 'error' : 'success');
-            toastIcon.textContent = isError ? '❌' : '✅';
+            toast.className = 'toast-banner ' + (isError ? 'is-error' : 'is-success');
+            symbol.textContent = isError ? '⚠' : '✓';
+            label.textContent = text;
             toast.style.display = 'flex';
 
             setTimeout(() => {
                 toast.style.display = 'none';
-            }, 4000);
+            }, 4500);
         }
 
         document.getElementById('orderForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
-            const btn = document.getElementById('btnSubmit');
-            const customerName = document.getElementById('customerName').value.trim();
+            const btn = document.getElementById('submitBtn');
+            const name = document.getElementById('customerName').value.trim();
             const weight = parseFloat(document.getElementById('weightKg').value);
 
-            if (!customerName) {
-                showToast('Nama pelanggan wajib diisi', true);
+            if (!name) {
+                triggerToast('Nama pelanggan tidak boleh kosong', true);
                 return;
             }
 
             if (weight < 2.0) {
-                showToast('Berat cucian minimal 2 kg', true);
+                triggerToast('Berat cucian minimal 2,0 kg', true);
                 return;
             }
 
             btn.disabled = true;
-            btn.textContent = 'Memproses ke API...';
+            btn.innerHTML = '<span>Menerbitkan Faktur...</span>';
 
             try {
-                const response = await fetch('/api/orders', {
+                const res = await fetch('/api/orders', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Accept': 'application/json'
                     },
                     body: JSON.stringify({
-                        customer_name: customerName,
+                        customer_name: name,
                         weight_kg: weight,
-                        service_type: selectedService
+                        service_type: currentService
                     })
                 });
 
-                const data = await response.json();
+                const json = await res.json();
 
-                if (response.ok && data.data) {
-                    showToast(`Sukses! Pesanan ${data.data.order_number} berhasil dibuat.`);
+                if (res.ok && json.data) {
+                    triggerToast(`Pesanan ${json.data.order_number} berhasil diterbitkan.`);
 
-                    // Append row to table
-                    const tbody = document.getElementById('orderTableBody');
-                    const emptyRow = document.getElementById('emptyRow');
-                    if (emptyRow) emptyRow.remove();
+                    // Remove empty placeholder if any
+                    const empty = document.getElementById('emptyPlaceholder');
+                    if (empty) empty.remove();
 
-                    const newRow = document.createElement('tr');
-                    newRow.innerHTML = `
-                        <td><strong>${data.data.order_number}</strong></td>
-                        <td>${data.data.customer_name}</td>
-                        <td><span style="text-transform: capitalize;">${data.data.service_type}</span></td>
-                        <td>${parseFloat(data.data.weight_kg).toFixed(1)} kg</td>
-                        <td style="font-weight: 600; color: var(--success);">${formatRupiah(data.data.total_amount)}</td>
-                        <td><span class="status-pill status-pending">${data.data.status}</span></td>
+                    // Prepend new order to table
+                    const tbody = document.getElementById('ledgerBody');
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td class="invoice-code">${json.data.order_number}</td>
+                        <td class="customer-cell">${json.data.customer_name}</td>
+                        <td><span style="text-transform: capitalize; font-size: 0.8rem; color: var(--color-ink-muted);">${json.data.service_type}</span></td>
+                        <td class="rate-cell">${parseFloat(json.data.weight_kg).toFixed(1)} kg</td>
+                        <td class="rate-cell">${toRupiah(json.data.total_amount)}</td>
+                        <td><span class="status-badge badge-pending">${json.data.status}</span></td>
                     `;
-                    tbody.prepend(newRow);
+                    tbody.prepend(tr);
 
                     // Reset form
                     document.getElementById('customerName').value = '';
                     document.getElementById('weightKg').value = '3.0';
-                    selectService('standar');
+                    setService('standar');
                 } else {
-                    const errorMsg = data.message || (data.errors ? Object.values(data.errors).flat().join(', ') : 'Terjadi kesalahan validasi.');
-                    showToast(errorMsg, true);
+                    const errDetail = json.message || (json.errors ? Object.values(json.errors).flat().join(', ') : 'Gagal memproses pesanan.');
+                    triggerToast(errDetail, true);
                 }
             } catch (err) {
-                showToast('Gagal menghubungi server API: ' + err.message, true);
+                triggerToast('Gagal terhubung dengan server API.', true);
             } finally {
                 btn.disabled = false;
-                btn.textContent = 'Proses Pesanan (POST /api/orders)';
+                btn.innerHTML = `
+                    <span>Terbitkan Pesanan</span>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                `;
             }
         });
 
-        // Initialize calculation
-        updateCalculation();
+        // Initialize receipt
+        refreshReceipt();
     </script>
 </body>
 </html>
