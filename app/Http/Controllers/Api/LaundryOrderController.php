@@ -15,6 +15,7 @@ use App\Models\LaundryService;
 use App\Models\OrderItem;
 use App\Services\OrderCalculationService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class LaundryOrderController extends Controller
@@ -22,6 +23,42 @@ class LaundryOrderController extends Controller
     public function __construct(
         protected OrderCalculationService $calculationService,
     ) {}
+
+    /**
+     * Display a listing of laundry orders, optionally filtered by status.
+     */
+    public function index(Request $request): JsonResponse
+    {
+        $query = LaundryOrder::with('customer')->latest();
+
+        $statusParam = $request->query('status');
+        if (is_string($statusParam) && trim($statusParam) !== '') {
+            $normalizedStatus = strtolower(trim($statusParam));
+            $query->whereRaw('LOWER(status) = ?', [$normalizedStatus]);
+        }
+
+        $orders = $query->get()->map(function (LaundryOrder $order): array {
+            return [
+                'id' => $order->id,
+                'order_number' => $order->order_number,
+                'customer_name' => $order->customer?->name,
+                'customer_phone' => $order->customer_phone ?? $order->customer?->phone,
+                'service_type' => $order->service_type,
+                'weight_kg' => (float) $order->weight_kg,
+                'unit_price' => (int) $order->unit_price,
+                'subtotal' => (int) $order->subtotal,
+                'total_amount' => (int) $order->total_amount,
+                'status' => $order->status->value,
+                'status_label' => $order->status->label(),
+                'created_at' => $order->created_at?->toIso8601String(),
+            ];
+        });
+
+        return response()->json([
+            'message' => 'Daftar pesanan berhasil diambil.',
+            'data' => $orders,
+        ]);
+    }
 
     /**
      * Create a new laundry order.

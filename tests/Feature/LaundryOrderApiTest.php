@@ -212,4 +212,123 @@ class LaundryOrderApiTest extends TestCase
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['status']);
     }
+
+    public function test_can_list_all_laundry_orders(): void
+    {
+        $customer = Customer::create([
+            'name' => 'Bambang Soediro',
+            'phone' => '081344556677',
+        ]);
+
+        LaundryOrder::create([
+            'order_number' => 'LND-LIST-001',
+            'customer_id' => $customer->id,
+            'customer_phone' => '081344556677',
+            'status' => OrderStatus::Pending,
+            'service_type' => 'standar',
+            'weight_kg' => 3.0,
+            'unit_price' => 10000,
+            'total_amount' => 30000,
+        ]);
+
+        LaundryOrder::create([
+            'order_number' => 'LND-LIST-002',
+            'customer_id' => $customer->id,
+            'customer_phone' => '081344556677',
+            'status' => OrderStatus::InProgress,
+            'service_type' => 'express',
+            'weight_kg' => 2.0,
+            'unit_price' => 20000,
+            'total_amount' => 40000,
+        ]);
+
+        $response = $this->getJson('/api/orders');
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'message',
+                'data' => [
+                    '*' => [
+                        'id',
+                        'order_number',
+                        'customer_name',
+                        'customer_phone',
+                        'service_type',
+                        'weight_kg',
+                        'unit_price',
+                        'subtotal',
+                        'total_amount',
+                        'status',
+                        'status_label',
+                        'created_at',
+                    ],
+                ],
+            ])
+            ->assertJsonCount(2, 'data');
+    }
+
+    public function test_can_filter_laundry_orders_by_status_with_case_insensitivity(): void
+    {
+        $customer = Customer::create([
+            'name' => 'Rina Nose',
+            'phone' => '081299990000',
+        ]);
+
+        // 1. Pending
+        LaundryOrder::create([
+            'order_number' => 'LND-FILTER-001',
+            'customer_id' => $customer->id,
+            'customer_phone' => '081299990000',
+            'status' => OrderStatus::Pending,
+            'service_type' => 'standar',
+            'weight_kg' => 3.0,
+            'unit_price' => 10000,
+            'total_amount' => 30000,
+        ]);
+
+        // 2. InProgress
+        LaundryOrder::create([
+            'order_number' => 'LND-FILTER-002',
+            'customer_id' => $customer->id,
+            'customer_phone' => '081299990000',
+            'status' => OrderStatus::InProgress,
+            'service_type' => 'express',
+            'weight_kg' => 2.5,
+            'unit_price' => 20000,
+            'total_amount' => 50000,
+        ]);
+
+        // 3. Completed
+        LaundryOrder::create([
+            'order_number' => 'LND-FILTER-003',
+            'customer_id' => $customer->id,
+            'customer_phone' => '081299990000',
+            'status' => OrderStatus::Completed,
+            'service_type' => 'standar',
+            'weight_kg' => 4.0,
+            'unit_price' => 10000,
+            'total_amount' => 40000,
+        ]);
+
+        // Filter with ?status=Pending (capitalized as requested)
+        $responsePending = $this->getJson('/api/orders?status=Pending');
+        $responsePending->assertStatus(200)
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.order_number', 'LND-FILTER-001')
+            ->assertJsonPath('data.0.status', 'pending');
+
+        // Filter with ?status=completed (lowercase)
+        $responseCompleted = $this->getJson('/api/orders?status=completed');
+        $responseCompleted->assertStatus(200)
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.order_number', 'LND-FILTER-003')
+            ->assertJsonPath('data.0.status', 'completed');
+
+        // Filter with ?status=in_progress
+        $responseInProgress = $this->getJson('/api/orders?status=in_progress');
+        $responseInProgress->assertStatus(200)
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.order_number', 'LND-FILTER-002')
+            ->assertJsonPath('data.0.status', 'in_progress');
+    }
 }
