@@ -8,6 +8,7 @@ use App\Enums\OrderStatus;
 use App\Enums\ServiceType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreLaundryOrderRequest;
+use App\Http\Requests\UpdateOrderStatusRequest;
 use App\Models\Customer;
 use App\Models\LaundryOrder;
 use App\Models\LaundryService;
@@ -31,16 +32,22 @@ class LaundryOrderController extends Controller
         $validated = $request->validated();
 
         $customerName = trim($validated['customer_name']);
+        $customerPhone = $request->getCustomerPhone();
         $weightKg = (float) $validated['weight_kg'];
         $serviceType = ServiceType::from($validated['service_type']);
 
         $unitPrice = $this->calculationService->getPricePerKg($serviceType);
         $totalAmount = $this->calculationService->calculateLaundryPrice($weightKg, $serviceType);
 
-        $order = DB::transaction(function () use ($customerName, $weightKg, $serviceType, $unitPrice, $totalAmount): LaundryOrder {
+        $order = DB::transaction(function () use ($customerName, $customerPhone, $weightKg, $serviceType, $unitPrice, $totalAmount): LaundryOrder {
             $customer = Customer::firstOrCreate(
-                ['name' => $customerName]
+                ['name' => $customerName],
+                ['phone' => $customerPhone]
             );
+
+            if ($customerPhone !== '' && $customer->phone !== $customerPhone) {
+                $customer->update(['phone' => $customerPhone]);
+            }
 
             $orderCount = LaundryOrder::count() + 1;
             $orderNumber = $this->calculationService->generateOrderNumber($orderCount);
@@ -48,6 +55,7 @@ class LaundryOrderController extends Controller
             $order = LaundryOrder::create([
                 'order_number' => $orderNumber,
                 'customer_id' => $customer->id,
+                'customer_phone' => $customerPhone,
                 'status' => OrderStatus::Pending,
                 'service_type' => $serviceType->value,
                 'weight_kg' => $weightKg,
@@ -86,6 +94,7 @@ class LaundryOrderController extends Controller
                 'id' => $order->id,
                 'order_number' => $order->order_number,
                 'customer_name' => $customerName,
+                'customer_phone' => $customerPhone,
                 'service_type' => $serviceType->value,
                 'weight_kg' => $weightKg,
                 'unit_price' => $unitPrice,
@@ -93,5 +102,31 @@ class LaundryOrderController extends Controller
                 'status' => OrderStatus::Pending->label(),
             ],
         ], 201);
+    }
+
+    /**
+     * Update the status of an existing laundry order.
+     */
+    public function updateStatus(UpdateOrderStatusRequest $request, LaundryOrder $order): JsonResponse
+    {
+        /** @var array{status: string} $validated */
+        $validated = $request->validated();
+
+        $newStatus = OrderStatus::from($validated['status']);
+
+        $order->update([
+            'status' => $newStatus,
+            'completed_at' => $newStatus === OrderStatus::Completed ? now() : $order->completed_at,
+        ]);
+
+        return response()->json([
+            'message' => 'Status pesanan berhasil diperbarui.',
+            'data' => [
+                'id' => $order->id,
+                'order_number' => $order->order_number,
+                'status' => $newStatus->value,
+                'status_label' => $newStatus->label(),
+            ],
+        ]);
     }
 }

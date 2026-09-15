@@ -6,3 +6,5 @@ use App\Http\Controllers\Api\LaundryOrderController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/orders', [LaundryOrderController::class, 'store']);
+Route::patch('/orders/{order}/status', [LaundryOrderController::class, 'updateStatus']);
+Route::put('/orders/{order}/status', [LaundryOrderController::class, 'updateStatus']);

@@ -22,6 +22,7 @@ class LaundryOrder extends Model
     protected $fillable = [
         'order_number',
         'customer_id',
+        'customer_phone',
         'status',
         'service_type',
         'weight_kg',

@@ -29,8 +29,18 @@ class StoreLaundryOrderRequest extends FormRequest
     {
         return [
             'customer_name' => ['required', 'string', 'max:255'],
+            'customer_phone' => ['required_without:phone', 'nullable', 'string', 'max:30'],
+            'phone' => ['required_without:customer_phone', 'nullable', 'string', 'max:30'],
             'weight_kg' => ['required', 'numeric', 'min:2'],
             'service_type' => ['required', 'string', Rule::enum(ServiceType::class)],
         ];
+    }
+
+    /**
+     * Get the sanitized customer phone number.
+     */
+    public function getCustomerPhone(): string
+    {
+        return (string) ($this->input('customer_phone') ?? $this->input('phone'));
     }
 }
