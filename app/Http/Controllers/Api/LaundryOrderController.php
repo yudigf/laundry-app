@@ -99,7 +99,7 @@ class LaundryOrderController extends Controller
                 'order_number' => $orderNumber,
                 'customer_id' => $customer->id,
                 'customer_phone' => $customerPhone,
-                'payment_status' => PaymentStatus::Unpaid,
+                'payment_status' => PaymentStatus::ngutang_dulu,
                 'status' => OrderStatus::Pending,
                 'service_type' => $serviceType->value,
                 'weight_kg' => $weightKg,
