@@ -341,4 +341,167 @@ class LaundryOrderApiTest extends TestCase
             ->assertJsonPath('data.0.order_number', 'LND-FILTER-002')
             ->assertJsonPath('data.0.status', 'in_progress');
     }
+
+    public function test_can_mark_order_as_paid_successfully(): void
+    {
+        $customer = Customer::create([
+            'name' => 'Agus Salim',
+            'phone' => '081200001111',
+        ]);
+
+        $order = LaundryOrder::create([
+            'order_number' => 'LND-PAY-001',
+            'customer_id' => $customer->id,
+            'customer_phone' => '081200001111',
+            'status' => OrderStatus::Pending,
+            'payment_status' => PaymentStatus::Unpaid,
+            'service_type' => 'standar',
+            'weight_kg' => 3.0,
+            'unit_price' => 10000,
+            'subtotal' => 30000,
+            'discount_amount' => 0,
+            'tax_amount' => 0,
+            'total_amount' => 30000,
+        ]);
+
+        $response = $this->patchJson("/api/orders/{$order->id}/payment", [
+            'payment_status' => 'paid',
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'message' => 'Status pembayaran berhasil diperbarui.',
+                'data' => [
+                    'id' => $order->id,
+                    'order_number' => 'LND-PAY-001',
+                    'payment_status' => 'paid',
+                    'payment_status_label' => 'Lunas',
+                    'payment_method' => 'cash',
+                ],
+            ]);
+
+        // Verify paid_at is set
+        $response->assertJsonStructure([
+            'data' => ['paid_at'],
+        ]);
+
+        $this->assertNotNull($response->json('data.paid_at'));
+
+        $this->assertDatabaseHas('laundry_orders', [
+            'id' => $order->id,
+            'payment_status' => 'paid',
+            'payment_method' => 'cash',
+        ]);
+
+        // Verify paid_at is stored in database
+        $order->refresh();
+        $this->assertNotNull($order->paid_at);
+    }
+
+    public function test_can_revert_payment_back_to_unpaid(): void
+    {
+        $customer = Customer::create([
+            'name' => 'Budi Revert',
+            'phone' => '081200002222',
+        ]);
+
+        $order = LaundryOrder::create([
+            'order_number' => 'LND-PAY-002',
+            'customer_id' => $customer->id,
+            'customer_phone' => '081200002222',
+            'status' => OrderStatus::Pending,
+            'payment_status' => PaymentStatus::Paid,
+            'paid_at' => now()->format('Y-m-d H:i:s'),
+            'payment_method' => 'cash',
+            'service_type' => 'express',
+            'weight_kg' => 2.0,
+            'unit_price' => 20000,
+            'subtotal' => 40000,
+            'discount_amount' => 0,
+            'tax_amount' => 0,
+            'total_amount' => 40000,
+        ]);
+
+        $response = $this->patchJson("/api/orders/{$order->id}/payment", [
+            'payment_status' => 'unpaid',
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'data' => [
+                    'payment_status' => 'unpaid',
+                    'payment_status_label' => 'Belum Lunas',
+                    'paid_at' => null,
+                    'payment_method' => null,
+                ],
+            ]);
+
+        $this->assertDatabaseHas('laundry_orders', [
+            'id' => $order->id,
+            'payment_status' => 'unpaid',
+        ]);
+    }
+
+    public function test_update_payment_fails_for_invalid_payment_status(): void
+    {
+        $customer = Customer::create([
+            'name' => 'Invalid Pay',
+            'phone' => '081200003333',
+        ]);
+
+        $order = LaundryOrder::create([
+            'order_number' => 'LND-PAY-003',
+            'customer_id' => $customer->id,
+            'status' => OrderStatus::Pending,
+            'service_type' => 'standar',
+            'weight_kg' => 2.0,
+            'unit_price' => 10000,
+            'total_amount' => 20000,
+        ]);
+
+        $response = $this->patchJson("/api/orders/{$order->id}/payment", [
+            'payment_status' => 'unknown_payment',
+        ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['payment_status']);
+    }
+
+    public function test_index_returns_paid_at_and_payment_method(): void
+    {
+        $customer = Customer::create([
+            'name' => 'Indeks Pay',
+            'phone' => '081200004444',
+        ]);
+
+        LaundryOrder::create([
+            'order_number' => 'LND-PAY-IDX-001',
+            'customer_id' => $customer->id,
+            'customer_phone' => '081200004444',
+            'status' => OrderStatus::Pending,
+            'payment_status' => PaymentStatus::Paid,
+            'paid_at' => '2026-09-16 10:30:00',
+            'payment_method' => 'cash',
+            'service_type' => 'standar',
+            'weight_kg' => 3.0,
+            'unit_price' => 10000,
+            'total_amount' => 30000,
+        ]);
+
+        $response = $this->getJson('/api/orders');
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'data' => [
+                    '*' => [
+                        'paid_at',
+                        'payment_method',
+                        'payment_status',
+                        'payment_status_label',
+                    ],
+                ],
+            ])
+            ->assertJsonPath('data.0.paid_at', '2026-09-16 10:30:00')
+            ->assertJsonPath('data.0.payment_method', 'cash');
+    }
 }

@@ -10,6 +10,7 @@ use App\Enums\ServiceType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreLaundryOrderRequest;
 use App\Http\Requests\UpdateOrderStatusRequest;
+use App\Http\Requests\UpdatePaymentStatusRequest;
 use App\Models\Customer;
 use App\Models\LaundryOrder;
 use App\Models\LaundryService;
@@ -51,6 +52,8 @@ class LaundryOrderController extends Controller
                 'total_amount' => (int) $order->total_amount,
                 'payment_status' => $order->payment_status->value,
                 'payment_status_label' => $order->payment_status->label(),
+                'paid_at' => $order->paid_at?->format('Y-m-d H:i:s'),
+                'payment_method' => $order->payment_method,
                 'status' => $order->status->value,
                 'status_label' => $order->status->label(),
                 'created_at' => $order->created_at?->toIso8601String(),
@@ -169,6 +172,39 @@ class LaundryOrderController extends Controller
                 'order_number' => $order->order_number,
                 'status' => $newStatus->value,
                 'status_label' => $newStatus->label(),
+            ],
+        ]);
+    }
+
+    /**
+     * Update the payment status of an existing laundry order.
+     */
+    public function updatePayment(UpdatePaymentStatusRequest $request, LaundryOrder $order): JsonResponse
+    {
+        /** @var array{payment_status: string, payment_method?: string|null} $validated */
+        $validated = $request->validated();
+
+        $newPaymentStatus = PaymentStatus::from($validated['payment_status']);
+
+        $updateData = [
+            'payment_status' => $newPaymentStatus,
+            'paid_at' => $newPaymentStatus === PaymentStatus::Paid ? now()->format('Y-m-d H:i:s') : null,
+            'payment_method' => $newPaymentStatus === PaymentStatus::Paid
+                ? ($validated['payment_method'] ?? 'cash')
+                : null,
+        ];
+
+        $order->update($updateData);
+
+        return response()->json([
+            'message' => 'Status pembayaran berhasil diperbarui.',
+            'data' => [
+                'id' => $order->id,
+                'order_number' => $order->order_number,
+                'payment_status' => $newPaymentStatus->value,
+                'payment_status_label' => $newPaymentStatus->label(),
+                'paid_at' => $order->paid_at?->format('Y-m-d H:i:s'),
+                'payment_method' => $order->payment_method,
             ],
         ]);
     }
