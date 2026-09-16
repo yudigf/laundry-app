@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use App\Enums\OrderStatus;
+use App\Enums\PaymentStatus;
 use App\Models\Customer;
 use App\Models\LaundryOrder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -36,6 +37,8 @@ class LaundryOrderApiTest extends TestCase
                     'weight_kg' => 3.5,
                     'unit_price' => 10000,
                     'total_amount' => 35000,
+                    'payment_status' => PaymentStatus::Unpaid->value,
+                    'payment_status_label' => PaymentStatus::Unpaid->label(),
                     'status' => OrderStatus::Pending->label(),
                 ],
             ]);
@@ -50,6 +53,7 @@ class LaundryOrderApiTest extends TestCase
             'service_type' => 'standar',
             'total_amount' => 35000,
             'status' => 'pending',
+            'payment_status' => 'unpaid',
         ]);
     }
 
@@ -75,6 +79,8 @@ class LaundryOrderApiTest extends TestCase
                     'weight_kg' => 2.0,
                     'unit_price' => 20000,
                     'total_amount' => 40000,
+                    'payment_status' => PaymentStatus::Unpaid->value,
+                    'payment_status_label' => PaymentStatus::Unpaid->label(),
                     'status' => OrderStatus::Pending->label(),
                 ],
             ]);
@@ -85,6 +91,7 @@ class LaundryOrderApiTest extends TestCase
             'unit_price' => 20000,
             'total_amount' => 40000,
             'status' => 'pending',
+            'payment_status' => 'unpaid',
         ]);
     }
 
@@ -258,13 +265,16 @@ class LaundryOrderApiTest extends TestCase
                         'unit_price',
                         'subtotal',
                         'total_amount',
+                        'payment_status',
+                        'payment_status_label',
                         'status',
                         'status_label',
                         'created_at',
                     ],
                 ],
             ])
-            ->assertJsonCount(2, 'data');
+            ->assertJsonCount(2, 'data')
+            ->assertJsonPath('data.0.payment_status', PaymentStatus::Unpaid->value);
     }
 
     public function test_can_filter_laundry_orders_by_status_with_case_insensitivity(): void

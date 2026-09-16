@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api;
 
 use App\Enums\OrderStatus;
+use App\Enums\PaymentStatus;
 use App\Enums\ServiceType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreLaundryOrderRequest;
@@ -48,6 +49,8 @@ class LaundryOrderController extends Controller
                 'unit_price' => (int) $order->unit_price,
                 'subtotal' => (int) $order->subtotal,
                 'total_amount' => (int) $order->total_amount,
+                'payment_status' => $order->payment_status->value,
+                'payment_status_label' => $order->payment_status->label(),
                 'status' => $order->status->value,
                 'status_label' => $order->status->label(),
                 'created_at' => $order->created_at?->toIso8601String(),
@@ -93,6 +96,7 @@ class LaundryOrderController extends Controller
                 'order_number' => $orderNumber,
                 'customer_id' => $customer->id,
                 'customer_phone' => $customerPhone,
+                'payment_status' => PaymentStatus::Unpaid,
                 'status' => OrderStatus::Pending,
                 'service_type' => $serviceType->value,
                 'weight_kg' => $weightKg,
@@ -136,6 +140,8 @@ class LaundryOrderController extends Controller
                 'weight_kg' => $weightKg,
                 'unit_price' => $unitPrice,
                 'total_amount' => $totalAmount,
+                'payment_status' => PaymentStatus::Unpaid->value,
+                'payment_status_label' => PaymentStatus::Unpaid->label(),
                 'status' => OrderStatus::Pending->label(),
             ],
         ], 201);
