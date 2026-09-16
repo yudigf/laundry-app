@@ -552,18 +552,40 @@
             font-weight: 600;
             white-space: nowrap;
             letter-spacing: 0.02em;
+            transition: all 0.18s ease;
         }
 
         .payment-unpaid {
             background: #fef2f2;
             color: #b91c1c;
             border: 1px solid #fecaca;
+            cursor: pointer;
+        }
+
+        .payment-unpaid:hover {
+            background: #fee2e2;
+            box-shadow: 0 2px 8px rgba(185, 28, 28, 0.15);
+            transform: translateY(-1px);
         }
 
         .payment-paid {
             background: #f0fdf4;
             color: #15803d;
             border: 1px solid #bbf7d0;
+        }
+
+        .payment-badge.is-loading {
+            opacity: 0.5;
+            pointer-events: none;
+            cursor: wait;
+        }
+
+        .paid-at-time {
+            display: block;
+            font-size: 0.675rem;
+            color: var(--color-ink-muted);
+            font-family: var(--font-mono);
+            margin-top: 0.2rem;
         }
 
         /* Status Select in Action Column */
@@ -764,10 +786,19 @@
                                     </td>
                                     <td class="rate-cell">{{ number_format((float) $order->weight_kg, 1) }} kg</td>
                                     <td class="rate-cell">Rp {{ number_format($order->total_amount, 0, ',', '.') }}</td>
-                                    <td>
-                                        <span class="payment-badge {{ $order->payment_status->value === 'paid' ? 'payment-paid' : 'payment-unpaid' }}">
-                                            {{ $order->payment_status->label() }}
-                                        </span>
+                                    <td id="payment-cell-{{ $order->id }}">
+                                        @if($order->payment_status->value === 'paid')
+                                            <span class="payment-badge payment-paid" id="payment-badge-{{ $order->id }}">
+                                                ✓ {{ $order->payment_status->label() }}
+                                            </span>
+                                            @if($order->paid_at)
+                                                <span class="paid-at-time">{{ $order->paid_at->format('d/m/Y H:i') }}</span>
+                                            @endif
+                                        @else
+                                            <span class="payment-badge payment-unpaid" id="payment-badge-{{ $order->id }}" onclick="markAsPaid({{ $order->id }}, this)" title="Klik untuk tandai lunas">
+                                                {{ $order->payment_status->label() }}
+                                            </span>
+                                        @endif
                                     </td>
                                     <td>
                                         <span class="status-badge badge-{{ strtolower($order->status->value) }}" id="status-badge-{{ $order->id }}">
@@ -932,7 +963,7 @@
                         <td><span style="text-transform: capitalize; font-size: 0.8rem; color: var(--color-ink-muted);">${json.data.service_type}</span></td>
                         <td class="rate-cell">${parseFloat(json.data.weight_kg).toFixed(1)} kg</td>
                         <td class="rate-cell">${toRupiah(json.data.total_amount)}</td>
-                        <td><span class="payment-badge payment-unpaid">${json.data.payment_status_label || 'Belum Lunas'}</span></td>
+                        <td id="payment-cell-${json.data.id}"><span class="payment-badge payment-unpaid" id="payment-badge-${json.data.id}" onclick="markAsPaid(${json.data.id}, this)" title="Klik untuk tandai lunas">${json.data.payment_status_label || 'Belum Lunas'}</span></td>
                         <td><span class="status-badge badge-pending" id="status-badge-${json.data.id}">${json.data.status}</span></td>
                         <td>
                             <select class="status-select" onchange="changeOrderStatus(${json.data.id}, this.value, this)">
@@ -997,6 +1028,63 @@
                 triggerToast('Koneksi terputus saat memperbarui status.', true);
             } finally {
                 selectElement.disabled = false;
+            }
+        }
+
+        // Mark as Paid: PATCH /api/orders/{id}/payment
+        async function markAsPaid(orderId, badgeElement) {
+            if (!confirm('Tandai pesanan ini sebagai LUNAS?')) return;
+
+            badgeElement.classList.add('is-loading');
+            badgeElement.textContent = 'Memproses...';
+
+            try {
+                const response = await fetch(`/api/orders/${orderId}/payment`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        payment_status: 'paid',
+                        payment_method: 'cash'
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.data) {
+                    // Update the entire payment cell
+                    const cell = document.getElementById(`payment-cell-${orderId}`);
+                    if (cell) {
+                        const paidAt = data.data.paid_at || '-';
+                        // Format paid_at for display (YYYY-MM-DD HH:mm:ss -> DD/MM/YYYY HH:mm)
+                        let formattedTime = paidAt;
+                        if (paidAt && paidAt !== '-') {
+                            const d = new Date(paidAt.replace(' ', 'T'));
+                            const dd = String(d.getDate()).padStart(2, '0');
+                            const mm = String(d.getMonth() + 1).padStart(2, '0');
+                            const yyyy = d.getFullYear();
+                            const hh = String(d.getHours()).padStart(2, '0');
+                            const mi = String(d.getMinutes()).padStart(2, '0');
+                            formattedTime = `${dd}/${mm}/${yyyy} ${hh}:${mi}`;
+                        }
+                        cell.innerHTML = `
+                            <span class="payment-badge payment-paid" id="payment-badge-${orderId}">✓ ${data.data.payment_status_label}</span>
+                            <span class="paid-at-time">${formattedTime}</span>
+                        `;
+                    }
+                    triggerToast(`Pesanan ${data.data.order_number} telah dilunasi. Metode: ${data.data.payment_method || 'cash'}`);
+                } else {
+                    const msg = data.message || 'Gagal memperbarui status pembayaran.';
+                    triggerToast(msg, true);
+                    badgeElement.classList.remove('is-loading');
+                    badgeElement.textContent = 'Belum Lunas';
+                }
+            } catch (error) {
+                triggerToast('Koneksi terputus saat memperbarui pembayaran.', true);
+                badgeElement.classList.remove('is-loading');
+                badgeElement.textContent = 'Belum Lunas';
             }
         }
 

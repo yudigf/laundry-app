@@ -11,10 +11,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 
 /**
  * @property OrderStatus $status
  * @property PaymentStatus $payment_status
+ * @property Carbon|null $paid_at
+ * @property string|null $payment_method
+ * @property string|null $pickup_photo_path
  */
 class LaundryOrder extends Model
 {
@@ -29,6 +33,9 @@ class LaundryOrder extends Model
         'customer_id',
         'customer_phone',
         'payment_status',
+        'paid_at',
+        'payment_method',
+        'pickup_photo_path',
         'status',
         'service_type',
         'weight_kg',
@@ -49,6 +56,7 @@ class LaundryOrder extends Model
         return [
             'status' => OrderStatus::class,
             'payment_status' => PaymentStatus::class,
+            'paid_at' => 'datetime',
             'service_type' => 'string',
             'weight_kg' => 'float',
             'unit_price' => 'integer',
