@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\OrderStatus;
+use App\Enums\PaymentStatus;
 use Database\Factories\LaundryOrderFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -13,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property OrderStatus $status
+ * @property PaymentStatus $payment_status
  */
 class LaundryOrder extends Model
 {
@@ -26,6 +28,7 @@ class LaundryOrder extends Model
         'order_number',
         'customer_id',
         'customer_phone',
+        'payment_status',
         'status',
         'service_type',
         'weight_kg',
@@ -45,6 +48,7 @@ class LaundryOrder extends Model
     {
         return [
             'status' => OrderStatus::class,
+            'payment_status' => PaymentStatus::class,
             'service_type' => 'string',
             'weight_kg' => 'float',
             'unit_price' => 'integer',

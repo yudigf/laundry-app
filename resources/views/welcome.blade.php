@@ -542,6 +542,30 @@
             border: 1px solid var(--color-danger-border);
         }
 
+        /* Payment Status Badges */
+        .payment-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.65rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.725rem;
+            font-weight: 600;
+            white-space: nowrap;
+            letter-spacing: 0.02em;
+        }
+
+        .payment-unpaid {
+            background: #fef2f2;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+        }
+
+        .payment-paid {
+            background: #f0fdf4;
+            color: #15803d;
+            border: 1px solid #bbf7d0;
+        }
+
         /* Status Select in Action Column */
         .status-select {
             padding: 0.35rem 0.65rem;
@@ -718,6 +742,7 @@
                                 <th>Layanan</th>
                                 <th>Berat</th>
                                 <th>Total</th>
+                                <th>Pembayaran</th>
                                 <th>Status</th>
                                 <th>Aksi</th>
                             </tr>
@@ -740,6 +765,11 @@
                                     <td class="rate-cell">{{ number_format((float) $order->weight_kg, 1) }} kg</td>
                                     <td class="rate-cell">Rp {{ number_format($order->total_amount, 0, ',', '.') }}</td>
                                     <td>
+                                        <span class="payment-badge {{ $order->payment_status->value === 'paid' ? 'payment-paid' : 'payment-unpaid' }}">
+                                            {{ $order->payment_status->label() }}
+                                        </span>
+                                    </td>
+                                    <td>
                                         <span class="status-badge badge-{{ strtolower($order->status->value) }}" id="status-badge-{{ $order->id }}">
                                             {{ $order->status->label() }}
                                         </span>
@@ -756,7 +786,7 @@
                                 </tr>
                             @empty
                                 <tr id="emptyPlaceholder">
-                                    <td colspan="7">
+                                    <td colspan="8">
                                         <div class="empty-ledger">
                                             <p>Belum ada pesanan tersimpan hari ini.</p>
                                         </div>
@@ -902,6 +932,7 @@
                         <td><span style="text-transform: capitalize; font-size: 0.8rem; color: var(--color-ink-muted);">${json.data.service_type}</span></td>
                         <td class="rate-cell">${parseFloat(json.data.weight_kg).toFixed(1)} kg</td>
                         <td class="rate-cell">${toRupiah(json.data.total_amount)}</td>
+                        <td><span class="payment-badge payment-unpaid">${json.data.payment_status_label || 'Belum Lunas'}</span></td>
                         <td><span class="status-badge badge-pending" id="status-badge-${json.data.id}">${json.data.status}</span></td>
                         <td>
                             <select class="status-select" onchange="changeOrderStatus(${json.data.id}, this.value, this)">
